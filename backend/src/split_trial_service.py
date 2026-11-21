@@ -213,7 +213,7 @@ def approve_order(order_id, user):
     with connection() as conn:
         with conn.cursor(cursor_factory=RealDictCursor) as cur:
             # 锁机台行，串行化同一纸机上的并发审批。
-            cur.execute("SELECT id FROM split_trial_orders WHERE id=%s FOR UPDATE", (order_id,))
+            cur.execute("SELECT * FROM split_trial_orders WHERE id=%s FOR UPDATE", (order_id,))
             order = cur.fetchone()
             if not order:
                 raise HTTPException(404, "拆周试算单不存在")
