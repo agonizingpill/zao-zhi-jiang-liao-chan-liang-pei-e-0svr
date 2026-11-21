@@ -1,0 +1,53 @@
+#operations-evidence-open {
+  position: fixed;
+  inset: auto 1.25rem 1.25rem auto;
+  z-index: 20;
+  background: #173f3d;
+  border: 1px solid #f5f6f1;
+  color: white;
+  border-radius: .5rem;
+  padding: .7rem 1rem;
+  font: inherit;
+  cursor: pointer;
+}
+#operations-evidence {
+  width: min(76rem, 94vw);
+  max-width: 94vw;
+  max-height: 88vh;
+  padding: 1.25rem;
+  background: #f7f8f4;
+  color: #19302f;
+  border: 1px solid #98aba9;
+  border-radius: .65rem;
+  font: 15px/1.55 system-ui, sans-serif;
+}
+#operations-evidence::backdrop { background: #152b2bb0; }
+#operations-evidence header, #operations-evidence nav, #operations-evidence .evidence-tools {
+  position: static;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: .65rem;
+  background: transparent;
+  padding: 0;
+  color: inherit;
+}
+#operations-evidence header { justify-content: space-between; }
+#operations-evidence h2, #operations-evidence h3 { margin: .35em 0; color: inherit; }
+#operations-evidence button, #operations-evidence input {
+  width: auto;
+  font: inherit;
+  border: 1px solid #9baea8;
+  border-radius: .3rem;
+  padding: .38rem .55rem;
+  background: white;
+  color: #173f3d;
+}
+#operations-evidence button { cursor: pointer; }
+#operations-evidence button[aria-current="true"] { color: white; background: #173f3d; }
+#operations-evidence .evidence-table { overflow: auto; max-height: 54vh; margin-top: .7rem; }
+#operations-evidence table { width: 100%; border-collapse: collapse; background: white; color: inherit; }
+#operations-evidence th, #operations-evidence td { text-align: left; padding: .48rem .6rem; border: 1px solid #d5dfd9; }
+#operations-evidence th { position: sticky; top: 0; background: #e2ebe3; color: #173f3d; }
+#operations-evidence form { display: flex; gap: .3rem; }
+#operations-evidence form input { width: 9rem; min-width: 6rem; }

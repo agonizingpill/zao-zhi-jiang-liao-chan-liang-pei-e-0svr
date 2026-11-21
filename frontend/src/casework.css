@@ -1,0 +1,25 @@
+#operational-cases-open {position:fixed; right:1.25rem; bottom:4.6rem; z-index:25; border-radius:.55rem;
+  background:#174b51; color:white; border:1px solid #256972; padding:.65rem .9rem; cursor:pointer}
+#operational-cases-open[hidden] {display:none}
+#operational-cases {width:min(57rem, calc(100% - 1.5rem)); max-height:calc(100% - 2rem); overflow:auto;
+  border:1px solid #9ab8b6; border-radius:.9rem; padding:1.4rem; background:#f7fbfa; color:#163031;
+  font:inherit; box-shadow:0 1.2rem 4rem #001c2140}
+#operational-cases::backdrop {background:#11272dc4}
+#operational-cases header {display:flex; align-items:center; justify-content:space-between; gap:1rem}
+#operational-cases h2, #operational-cases h3, #operational-cases h4 {margin:.35rem 0 .75rem; color:#163031}
+#operational-cases .casework-controls, #operational-cases form {display:flex; flex-wrap:wrap; gap:.65rem;
+  align-items:end; padding:.8rem 0}
+#operational-cases label {display:flex; flex-direction:column; gap:.35rem; flex:1 1 11rem}
+#operational-cases button, #operational-cases select, #operational-cases input, #operational-cases textarea {
+  font:inherit; color:inherit; border:1px solid #87a7a5; border-radius:.4rem; background:white; padding:.45rem .65rem;
+  min-height:2.2rem; max-width:100%}
+#operational-cases button {cursor:pointer; background:#e7f1ed}
+#operational-cases button[type=submit] {background:#174b51; color:white}
+#operational-cases [role=status] {color:#225c63; min-height:1.35rem; margin:.35rem 0}
+#operational-cases ol {list-style:none; padding:0; margin:0; display:grid; gap:.55rem}
+#operational-cases li {padding:.8rem; border-left:.25rem solid #5c9893; background:#e9f3f0}
+#operational-cases li p {margin:.35rem 0; overflow-wrap:anywhere}
+#operational-cases table {width:100%; border-collapse:collapse; font-size:.9rem}
+#operational-cases th, #operational-cases td {padding:.4rem; text-align:left; border-bottom:1px solid #c2d7d3}
+#operational-cases details {margin:.6rem 0 1rem}
+#operational-cases summary {cursor:pointer; font-weight:600}
