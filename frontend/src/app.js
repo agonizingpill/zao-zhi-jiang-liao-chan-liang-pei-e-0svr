@@ -25,4 +25,3 @@ function bindPage() { document.querySelectorAll('[data-go]').forEach(b=>b.onclic
 render();
 // 供独立业务模块（拆周试算）复用，避免重复实现请求与渲染工具。
 window.pulpApp = { api, state, esc, status, fmt, toast, render };
-if (window.splitTrialHook && state.token && state.page === 'quotas') window.splitTrialHook();
