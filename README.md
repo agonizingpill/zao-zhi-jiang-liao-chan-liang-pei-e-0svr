@@ -32,7 +32,20 @@ curl http://localhost:18266/api/health
 - 纤维配比。原生浆、再生浆、损纸、含水率、灰分和工艺窗校验。
 - 机台工况。机速、定量、烘缸温度、蒸汽压力、安全周产能。
 - 产量配额。RandomForestRegressor 预测均值和 10%/90% 分位数带，跨安全上限时拆成两周。
+- 整批拆周试算。计划员填订单吨位、选同一纸机的两个周次和各自工况，两周分别试算后整单送审。
 - 领料计划。只允许在已批准配额内累计请求物料。
+
+## 整批拆周试算口径
+
+计划员在「周配额试算」页新建拆周试算单：填写订单吨位，并为同一台纸机选择两个周次及各自工况（预测下界）。
+
+- **两周分别试算，首周尽量多交。** 单周排量同时受两个上限约束：该周工况预测下界，以及该周机台余量（机台安全容量 − 该周已批 `quota_plans` 与已占用拆周行）。单周可排上限取二者较小值，首周先排到上限，第二周只补订单剩余。
+- **凑足才送审。** 两周排量之和达到订单吨位才置为 `ready` 可送审；否则试算失败（`trial_failed`）并按周记录缺口，不能送审。
+- **重试幂等。** 试算失败后可调整工况重试，周计划行按 `(order_id, week_index)` 唯一，重试先清旧的未占用周行再按当前余量重算，不会重复生成周计划；`trial_attempts` 累计试算次数。
+- **并发审批整单退回。** 主管审批时对机台行 `SELECT ... FOR UPDATE` 加锁，并在审批时点重新核算每周实时余量。任一周余量不足以承载试算排量，整单置为 `returned`，两周周行 `occupied` 始终为 false（都不占机台余量）；全部满足才统一置 `occupied=true` 并批准。
+- **配额页面。** `/split-trials/quota-overview` 与页面顶部「分周配额与缺口」表按机台/周展示分周排量、缺口、已占用与剩余余量。
+
+拆周试算单状态 `draft/trial_failed/ready/submitted/approved/returned` 见 `backend/src/schema.sql`、`backend/src/split_trial_service.py`、`frontend/src/split-trial.js`。
 
 ## 算法口径
 
@@ -44,6 +57,7 @@ worker 使用固定随机种子 42 生成 160 条带噪合成训练样本，特�
 - 批次状态 `registered/measured/forecasted/allocated/blocked`：`backend/src/schema.sql`、`backend/src/main.py`、`frontend/src/app.js`。
 - 配额状态 `queued/ready/split_required/approved/rejected`：`backend/src/schema.sql`、`backend/src/main.py`、`frontend/src/app.js`。
 - 领料状态 `requested/approved/issued/rejected`：`backend/src/schema.sql`、`backend/src/main.py`、`frontend/src/app.js`。
+- 拆周试算单状态 `draft/trial_failed/ready/submitted/approved/returned`：`backend/src/schema.sql`、`backend/src/split_trial_service.py`、`frontend/src/split-trial.js`。
 
 ## 目录与技术栈
 

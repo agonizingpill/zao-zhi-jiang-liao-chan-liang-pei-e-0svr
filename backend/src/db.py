@@ -29,6 +29,17 @@ def execute(sql, params=()):
             cur.execute(sql, params)
             return cur.rowcount
 
+@contextmanager
+def tx_cursor(one=False):
+    """在单个连接/事务内打开游标，供需要行锁与多语句原子性的服务使用。
+
+    提交/回滚由 :func:`connection` 上下文统一处理；游标使用 RealDictCursor，
+    返回普通 dict 以与 :func:`query` 保持一致。
+    """
+    with connection() as conn:
+        with conn.cursor(cursor_factory=RealDictCursor) as cur:
+            yield cur
+
 def wait_for_db():
     for _ in range(40):
         try:

@@ -56,3 +56,25 @@ def seed():
         q = query("SELECT id FROM quota_plans WHERE plan_code='QP-2611-001'", one=True)["id"]
         execute("""INSERT INTO material_issues(issue_code,quota_plan_id,material_name,quantity_tons,status,requested_by,approved_by,issued_at)
           VALUES ('MI-2611-001',%s,'漂白木浆',24,'approved',%s,%s,now())""", (q, operator, supervisor))
+
+    # 整批拆周试算演示：一条可送审成功单 + 一条受机台余量限制的失败单。
+    if not query("SELECT id FROM split_trial_orders WHERE order_code='ST-2611-001'", one=True):
+        order_id = query("""INSERT INTO split_trial_orders(order_code,machine_run_id,order_tons,status,
+            total_allocated_tons,total_gap_tons,trial_attempts,created_by,notes)
+          VALUES ('ST-2611-001',%s,100,'ready',100,0,1,%s,'整批拆周：首周尽量多交，次周补齐') RETURNING id""",
+          (m1, operator), one=True)["id"]
+        execute("""INSERT INTO split_trial_weeks(order_id,week_index,week_start,machine_run_id,
+            forecast_lower_tons,machine_remaining_tons,cap_tons,allocated_tons,gap_tons,constrained_by)
+          VALUES (%s,1,%s,%s,60,86,60,60,0,'forecast_lower'),
+                 (%s,2,%s,%s,70,86,70,40,0,'forecast_lower')""",
+          (order_id, date(2026,11,30), m1, order_id, date(2026,12,7), m1))
+    if not query("SELECT id FROM split_trial_orders WHERE order_code='ST-2611-002'", one=True):
+        order_id = query("""INSERT INTO split_trial_orders(order_code,machine_run_id,order_tons,status,
+            total_allocated_tons,total_gap_tons,trial_attempts,created_by,notes)
+          VALUES ('ST-2611-002',%s,120,'trial_failed',90,30,1,%s,'两周机台余量不足，记录缺口待重试') RETURNING id""",
+          (m2, operator), one=True)["id"]
+        execute("""INSERT INTO split_trial_weeks(order_id,week_index,week_start,machine_run_id,
+            forecast_lower_tons,machine_remaining_tons,cap_tons,allocated_tons,gap_tons,constrained_by)
+          VALUES (%s,1,%s,%s,50,50,50,50,0,'machine_remaining'),
+                 (%s,2,%s,%s,60,40,40,40,30,'machine_remaining')""",
+          (order_id, date(2026,11,30), m2, order_id, date(2026,12,7), m2))

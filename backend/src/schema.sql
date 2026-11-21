@@ -85,5 +85,49 @@ CREATE TABLE IF NOT EXISTS audit_logs (
   detail JSONB NOT NULL DEFAULT '{}'::jsonb,
   created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
+
+-- 整批拆周试算单：计划员填订单吨位，选同一纸机的两个周次与各自工况。
+CREATE TABLE IF NOT EXISTS split_trial_orders (
+  id SERIAL PRIMARY KEY,
+  order_code TEXT UNIQUE NOT NULL,
+  machine_run_id INTEGER NOT NULL REFERENCES machine_runs(id),
+  order_tons NUMERIC(10,2) NOT NULL CHECK (order_tons > 0),
+  status TEXT NOT NULL DEFAULT 'draft'
+    CHECK (status IN ('draft','trial_failed','ready','submitted','approved','returned')),
+  total_allocated_tons NUMERIC(10,2) NOT NULL DEFAULT 0,
+  total_gap_tons NUMERIC(10,2) NOT NULL DEFAULT 0,
+  trial_attempts INTEGER NOT NULL DEFAULT 0,
+  created_by INTEGER NOT NULL REFERENCES users(id),
+  submitted_by INTEGER REFERENCES users(id),
+  submitted_at TIMESTAMPTZ,
+  approved_by INTEGER REFERENCES users(id),
+  approved_at TIMESTAMPTZ,
+  reject_reason TEXT,
+  notes TEXT,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+-- 分周试算行：同一试算单下恰好两行，记录每周下界、机台余量、排量与缺口。
+CREATE TABLE IF NOT EXISTS split_trial_weeks (
+  id SERIAL PRIMARY KEY,
+  order_id INTEGER NOT NULL REFERENCES split_trial_orders(id) ON DELETE CASCADE,
+  week_index INTEGER NOT NULL CHECK (week_index IN (1, 2)),
+  week_start DATE NOT NULL,
+  machine_run_id INTEGER NOT NULL REFERENCES machine_runs(id),
+  forecast_lower_tons NUMERIC(10,2) NOT NULL,
+  machine_remaining_tons NUMERIC(10,2) NOT NULL,
+  cap_tons NUMERIC(10,2) NOT NULL,
+  allocated_tons NUMERIC(10,2) NOT NULL DEFAULT 0,
+  gap_tons NUMERIC(10,2) NOT NULL DEFAULT 0,
+  constrained_by TEXT NOT NULL DEFAULT ''
+    CHECK (constrained_by IN ('','forecast_lower','machine_remaining')),
+  -- 审批通过后该周真正占用机台余量；退回时两行都不占。
+  occupied BOOLEAN NOT NULL DEFAULT false,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  UNIQUE (order_id, week_index)
+);
+
 CREATE INDEX IF NOT EXISTS idx_quota_status ON quota_plans(status);
 CREATE INDEX IF NOT EXISTS idx_lot_status ON pulp_lots(status);
+CREATE INDEX IF NOT EXISTS idx_split_order_status ON split_trial_orders(status);
+CREATE INDEX IF NOT EXISTS idx_split_week_machine_week ON split_trial_weeks(machine_run_id, week_start);

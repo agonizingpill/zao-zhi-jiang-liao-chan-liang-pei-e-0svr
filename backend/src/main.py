@@ -4,6 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 from .casework_routes import router as operational_cases
 from .operations_evidence import router as operations_evidence
+from .split_trial_routes import router as split_trials
 from .auth import current_user, issue_token, password_hash, require_roles
 from .db import query, execute
 from .services import audit, validate_blend, enqueue_quota, serialize_row
@@ -11,6 +12,7 @@ from .services import audit, validate_blend, enqueue_quota, serialize_row
 app = FastAPI(title="Pulp Output Quota API")
 app.include_router(operational_cases)
 app.include_router(operations_evidence)
+app.include_router(split_trials)
 app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"])
 
 class LoginIn(BaseModel):
